@@ -426,3 +426,105 @@ image_save_err:
     fclose(f);
     return 1;
 }
+
+int export_to_array(const Image *img, void **out_array, int *len, ArrayDataFormat format)
+{
+    if (!img)
+        return 1;
+
+    switch (format)
+    {
+    case ARRAY_DATA_FORMAT_RGBA32:
+        *len = img->width * img->height;
+        *out_array = malloc(*len * sizeof(uint32_t));
+        break;
+    case ARRAY_DATA_FORMAT_RGB24:
+        *len = img->width * img->height * 3;
+        printf("Calculated array length for RGB24: %d\n", *len);
+        *out_array = malloc(*len * sizeof(uint8_t));
+        break;
+    case ARRAY_DATA_FORMAT_GRAYSCALE8:
+        *len = img->width * img->height;
+        *out_array = malloc(*len * sizeof(uint8_t));
+        break;
+    case ARRAY_DATA_FORMAT_BINARY1:
+        *len = (img->width * img->height + 7) / 8;
+        *out_array = malloc(*len * sizeof(uint8_t));
+        *out_array = memset(*out_array, 0, *len); // initialize all bits to 0 (white)
+        break;
+    default:
+        break;
+    }
+
+    if (!*out_array)
+        return 1;
+
+    for (int y = 0; y < img->height; y++)
+    {
+        for (int x = 0; x < img->width; x++)
+        {
+            uint32_t final_color = BACKGROUND_COLOR; // Start with Black
+
+            // Calculate the 1D index
+            size_t pixel_index = y * img->width + x;
+
+            // Blend all layers for the current pixel
+            for (int i = 0; i < img->num_layers; i++)
+            {
+                Layer *layer = img->layers[i];
+                uint32_t layer_pixel = layer->data[pixel_index];
+                final_color = blend_pixels(final_color, layer_pixel);
+            }
+
+            // Store in the requested format
+            switch (format)
+            {
+            case ARRAY_DATA_FORMAT_RGBA32:
+            {
+                uint32_t *arr = (uint32_t *)(*out_array);
+                arr[pixel_index] = final_color;
+                break;
+            }
+            case ARRAY_DATA_FORMAT_RGB24:
+            {
+                uint8_t *arr = (uint8_t *)(*out_array);
+                size_t base_index = pixel_index * 3;
+                arr[base_index + 0] = (uint8_t)GET_R(final_color);
+                arr[base_index + 1] = (uint8_t)GET_G(final_color);
+                arr[base_index + 2] = (uint8_t)GET_B(final_color);
+                break;
+            }
+            case ARRAY_DATA_FORMAT_GRAYSCALE8:
+            {
+                uint8_t *arr = (uint8_t *)(*out_array);
+                arr[pixel_index] = (uint8_t)(0.299 * GET_R(final_color) +
+                                             0.587 * GET_G(final_color) +
+                                             0.114 * GET_B(final_color));
+                break;
+            }
+            case ARRAY_DATA_FORMAT_BINARY1:
+            {
+                uint8_t *arr = (uint8_t *)(*out_array);
+                size_t byte_index = pixel_index / 8;
+                int bit_index = 7 - (pixel_index % 8);
+                unsigned char gray = (unsigned char)(0.299 * GET_R(final_color) +
+                                                     0.587 * GET_G(final_color) +
+                                                     0.114 * GET_B(final_color));
+                if (gray < 128)
+                {
+                    arr[byte_index] |= (1 << bit_index);
+                }
+                else
+                {
+                    arr[byte_index] &= ~(1 << bit_index);
+                }
+                break;
+            }
+            default:
+                break;
+            }
+        }
+    }
+
+    return 0;
+}
