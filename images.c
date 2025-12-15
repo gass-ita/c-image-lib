@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include <ctype.h>
 
 // Refcounting functions for Layer
 void retain_layer(Layer *layer)
@@ -427,7 +429,7 @@ image_save_err:
     return 1;
 }
 
-int export_to_array(const Image *img, void **out_array, int *len, ArrayDataFormat format)
+int export_to_array(const Image *img, void **out_array, size_t *len, ArrayDataFormat format)
 {
     if (!img)
         return 1;

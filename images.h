@@ -11,12 +11,14 @@
 #define BACKGROUND_COLOR COLOR(255, 0, 0, 0) // opaque black
 
 #include <stdint.h>
+#include <stdio.h>
 
 typedef enum ImageFileType
 {
-    IMAGE_FILE_PPM, // Portable Pixmap (Color)
-    IMAGE_FILE_PGM, // Portable Graymap (Grayscale)
-    IMAGE_FILE_PBM, // Portable Bitmap (Black & White)
+    IMAGE_FILE_PBM = 4, // Portable Bitmap (Black & White)
+    IMAGE_FILE_PGM = 5, // Portable Graymap (Grayscale)
+    IMAGE_FILE_PPM = 6, // Portable Pixmap (Color)
+    IMAGE_FILE_UNKNOWN = -1,
 } ImageFileType;
 
 /**
@@ -199,4 +201,4 @@ int save_image(const Image *img, const char *filename, ImageFileType type);
  * - BINARY1: Converts to grayscale first. Pixels with luminance < 128
  * are set to 1 (bit set), others are 0. Bits are packed MSB-first.
  */
-int export_to_array(const Image *img, void **out_array, int *len, ArrayDataFormat format);
+int export_to_array(const Image *img, void **out_array, size_t *len, ArrayDataFormat format);
