@@ -187,7 +187,10 @@ Layer *parse_image_file(const char *filename, ImageFileType *out_type)
 {
     Layer *layer = NULL;
     if (!filename || !out_type)
+    {
+        fprintf(stderr, "Error: Invalid arguments to parse_image_file\n");
         return NULL;
+    }
 
     *out_type = IMAGE_FILE_UNKNOWN;
 

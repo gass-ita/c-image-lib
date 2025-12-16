@@ -16,5 +16,9 @@ $(BUILD_DIR)/images-parser.o: images-parser.c | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir $(BUILD_DIR)
 
+main: libc-image-lib.a main.c
+	gcc main.c -W -Wall -o main -L. -lc-image-lib
+	./main
+
 clean:
 	rm -rf $(BUILD_DIR) libc-image-lib.a

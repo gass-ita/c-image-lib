@@ -6,22 +6,37 @@
 
 int main(void)
 {
-    Image *img = create_image(100, 100);
+    ImageFileType file_type;
+    Layer *layer = parse_image_file("sample_5184x3456.ppm", &file_type);
+    if (!layer)
+    {
+        fprintf(stderr, "Failed to parse image file\n");
+        return 1;
+    }
+    Image *img = create_image(layer->width, layer->height);
+    add_existing_layer(img, layer);
+    release_layer(layer);
     if (!img)
     {
         fprintf(stderr, "Failed to create image\n");
         return 1;
     }
-    Layer *layer1 = add_layer(img);
-    Layer *layer2 = add_layer(img);
 
-    draw_circle_filled(layer1, 50, 50, 30, COLOR(255, 255, 0, 0));      // Red circle
-    fill_layer(layer2, COLOR(128, 0, 0, 255));                          // Semi-transparent Blue circle
-    draw_ellipse_filled(layer2, 50, 50, 20, 40, COLOR(128, 0, 255, 0)); // Semi-transparent Green ellipse
-    if (save_image(img, "output.ppm", IMAGE_FILE_PPM) != 0)
+    printf("Image created with dimensions: %dx%d\n", img->width, img->height);
+
+    Layer *l = add_layer(img);
+    if (!l)
     {
-        fprintf(stderr, "Failed to save image\n");
-        free_image(img);
+        fprintf(stderr, "Failed to add layer to image\n");
         return 1;
     }
+
+    fill_layer(l, COLOR(100, 255, 255, 255));                                              // Fill the new layer with solid red color
+    draw_circle_filled(l, img->width / 2, img->height / 2, 1000, COLOR(100, 255, 0, 255)); // Draw a filled circle in the center
+    if (save_image(img, "output_image.ppm", file_type) != 0)
+    {
+        fprintf(stderr, "Failed to save image to file\n");
+        return 1;
+    }
+    return 0;
 }

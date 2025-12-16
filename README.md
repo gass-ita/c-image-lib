@@ -35,33 +35,24 @@ The project includes a `Makefile` that compiles the source into a static library
 
 1. **Build the library:**
 
-    Bash
-
-    ```
+    ```bash
     make
-
     ```
 
     This will create a `build/` directory containing the object files and the static library `libc-image-lib.a`.
 
 2. **Clean the build:**
 
-    Bash
-
-    ```
+    ```bash
     make clean
-
     ```
 
 3. Compiling your project:
 
     When compiling your own code against this library, ensure you link the math library (-lm).
 
-    Bash
-
-    ```
+    ```bash
     gcc main.c build/libc-image-lib.a -o my_program -lm
-
     ```
 
 Quick Start
@@ -69,9 +60,7 @@ Quick Start
 
 ### 1\. Basic Drawing
 
-C
-
-```
+```c
 #include "images.h"
 #include "images-primitives.h"
 
@@ -105,9 +94,7 @@ int main() {
 
 **Important:** When parsing an image from a file, the returned layer has a reference count of **1**. If you add it to an image (which increments the count), you must release your local reference to avoid memory leaks.
 
-C
-
-```
+```c
 #include "images.h"
 #include "images-parser.h"
 
@@ -132,7 +119,6 @@ int main() {
     free_image(canvas);
     return 0;
 }
-
 ```
 
 Memory Management
